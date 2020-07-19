@@ -1,4 +1,5 @@
 <script>
+  import {navigate} from 'svelte-routing';
   import ResumeForm from './ResumeForm.svelte';
 
   let resume = {
@@ -6,10 +7,21 @@
     description: '',
   };
 
-  function onSubmit(event) {
+  async function onSubmit(event) {
     event.preventDefault();
 
-    console.log(resume);
+    try {
+      const result = await window.fetch('http://localhost:8080/resumes', {
+        method: 'POST',
+        body: JSON.stringify(resume),
+        header: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      });
+      const json = await result.json();
+
+      navigate(`/resumes/${json.id}`);
+    } catch (err) {
+
+    }
   }
 </script>
 

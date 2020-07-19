@@ -14,15 +14,16 @@ import (
 
 func main() {
   client, _ := mongo.NewClient(options.Client().ApplyURI(os.Getenv("CHATTYY_DB_CONNECTION_STRING")))
-  client.Connect(context.Background())
+  client.Connect(context.TODO())
 
   db.Client = client
 
-  defer db.Client.Disconnect(context.Background())
+  defer db.Client.Disconnect(context.TODO())
 
   r := mux.NewRouter()
   r.HandleFunc("/resumes", resumes.Create).Methods("POST")
   r.HandleFunc("/resumes", resumes.Index)
+  r.HandleFunc("/resumes/{id}", resumes.Show)
 
   handler := cors.Default().Handler(r)
   http.ListenAndServe(":8080", handler)

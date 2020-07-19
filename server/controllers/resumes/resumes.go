@@ -8,14 +8,15 @@ import (
   "go.mongodb.org/mongo-driver/bson"
   "github.com/trivektor/svelte-resume-builder/db"
   "go.mongodb.org/mongo-driver/bson/primitive"
+  "github.com/gorilla/mux"
 )
 
 const DATABASE_NAME = "svelte_resumes_builder"
 const COLLECTION_NAME = "resumes"
 
 type Resume struct {
-  Name string `json:name`
-  Description string `json:description`
+  Name string `json:"name"`
+  Description string `json:"description"`
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -42,4 +43,19 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
   w.Header().Set("Content-Type", "application/json")
   w.Write(result)
+}
+
+func Show(w http.ResponseWriter, r *http.Request) {
+  params := mux.Vars(r)
+  id := params["id"]
+  var resume Resume
+  docId, _ := primitive.ObjectIDFromHex(id)
+
+  collection := db.Client.Database(DATABASE_NAME).Collection(COLLECTION_NAME)
+  collection.FindOne(context.TODO(), bson.M{"_id": docId}).Decode(&resume)
+
+  json, _ := json.Marshal(resume)
+
+  w.Header().Set("Content-Type", "application/json")
+  w.Write(json)
 }

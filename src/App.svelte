@@ -1,17 +1,18 @@
 <script>
-	import router from 'page';
+	import {Router, Route} from 'svelte-routing';
 	import Resumes from './components/Resumes.svelte';
 	import NewResume from './components/NewResume.svelte';
+	import Resume from './components/Resume.svelte';
 
-	let page;
-
-	router('/', () => page = Resumes);
-	router('/resumes/new', () => page = NewResume);
-
-	router.start();
+	export let url = '';
 </script>
 
-
 <div class="px-4 py-4">
-	<svelte:component this={page} />
+	<Router url="{url}">
+		<Route path='/' component="{Resumes}" />
+		<Route path='/resumes/new' component="{NewResume}" />
+		<Route path='/resumes/:id' let:params>
+			<Resume id="{params.id}" />
+		</Route>
+	</Router>
 </div>
