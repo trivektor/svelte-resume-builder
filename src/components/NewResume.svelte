@@ -5,6 +5,7 @@
   let resume = {
     name: '',
     description: '',
+    sections: [],
   };
 
   async function onSubmit(event) {

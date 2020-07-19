@@ -14,9 +14,16 @@ import (
 const DATABASE_NAME = "svelte_resumes_builder"
 const COLLECTION_NAME = "resumes"
 
-type Resume struct {
+type Section struct {
   Name string `json:"name"`
   Description string `json:"description"`
+}
+
+type Resume struct {
+  ID primitive.ObjectID `bson:"_id" json:"id"` 
+  Name string `json:"name"`
+  Description string `json:"description"`
+  Sections []Section `json:"sections"`
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
