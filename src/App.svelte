@@ -1,8 +1,17 @@
 <script>
-	export let name;
+	import router from 'page';
+	import Resumes from './components/Resumes.svelte';
+	import NewResume from './components/NewResume.svelte';
+
+	let page;
+
+	router('/', () => page = Resumes);
+	router('/resumes/new', () => page = NewResume);
+
+	router.start();
 </script>
 
-<main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
-</main>
+
+<div class="px-4 py-4">
+	<svelte:component this={page} />
+</div>

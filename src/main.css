@@ -3,3 +3,8 @@
 @import 'tailwindcss/components';
 
 @import 'tailwindcss/utilities';
+
+body {
+  padding: 0;
+  background: #f7fafc;
+}
