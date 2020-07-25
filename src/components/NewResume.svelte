@@ -1,16 +1,16 @@
 <script>
   import {navigate} from 'svelte-routing';
+  import {resumeStore} from '../stores';
+
   import ResumeForm from './ResumeForm.svelte';
 
-  let resume = {
-    name: '',
-    description: '',
-    sections: [],
-  };
+  let resume = {};
 
-  async function onSubmit(event) {
-    event.preventDefault();
+  resumeStore.subscribe((data) => {
+    resume = data;
+  });
 
+  async function onSubmit() {
     try {
       const result = await window.fetch('http://localhost:8080/resumes', {
         method: 'POST',
@@ -21,13 +21,13 @@
 
       navigate(`/resumes/${json.id}`);
     } catch (err) {
-
+      console.error(err);
     }
   }
 </script>
 
 <section class="bg-white rounded py-5 px-5 block border-2 border-gray">
-  <form on:submit={onSubmit}>
-    <ResumeForm resume={resume} />
+  <form on:submit|preventDefault={onSubmit}>
+    <ResumeForm />
   </form>
 </section>

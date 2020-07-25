@@ -1,12 +1,21 @@
 <script>
-  import {createEventDispatcher} from 'svelte';
   import Sections from './Sections.svelte';
-  export let resume;
+  import {resumeStore} from '../stores';
 
-  const dispatch = createEventDispatcher();
+  let resume = {};
+
+  resumeStore.subscribe((data) => {
+    resume = data;
+  });
 
   function addSection() {
-    dispatch('addSection');
+    resumeStore.update((state) => ({
+      ...state,
+      sections: [
+        ...(state.sections || []),
+        {},
+      ],
+    }));
   }
 </script>
 
