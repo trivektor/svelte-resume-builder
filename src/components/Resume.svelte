@@ -4,6 +4,10 @@
   import ResumeForm from './ResumeForm.svelte';
   import {resumeStore} from '../stores';
 
+  let resume;
+
+  resumeStore.subscribe((data) => resume = data);
+
   onMount(async () => {
     const result = await fetch(`http://localhost:8080/resumes/${id}`, {
       header: {'Accept': 'application/json'},
@@ -16,19 +20,21 @@
     }));
   });
 
-  async function onSubmit(event) {
-    event.preventDefault();
-
+  async function onSubmit() {
     try {
-      console.log({resume});
+      await window.fetch(`http://localhost:8080/resumes/${id}`, {
+        header: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+        method: 'PUT',
+        body: JSON.stringify(resume),
+      });
     } catch (err) {
-
+      console.error(err);
     }
   }
 </script>
 
 <section class="bg-white rounded py-5 px-5 block border-2 border-gray">
-  <form on:submit={onSubmit}>
+  <form on:submit|preventDefault={onSubmit}>
     <ResumeForm />
   </form>
 </section>

@@ -20,7 +20,7 @@ type Section struct {
 }
 
 type Resume struct {
-  ID primitive.ObjectID `bson:"_id" json:"id"` 
+  ID primitive.ObjectID `bson:"_id" json:"id"`
   Name string `json:"name"`
   Description string `json:"description"`
   Sections []Section `json:"sections"`
@@ -62,6 +62,32 @@ func Show(w http.ResponseWriter, r *http.Request) {
   collection.FindOne(context.TODO(), bson.M{"_id": docId}).Decode(&resume)
 
   json, _ := json.Marshal(resume)
+
+  w.Header().Set("Content-Type", "application/json")
+  w.Write(json)
+}
+
+func Update(w http.ResponseWriter, r *http.Request) {
+  params := mux.Vars(r)
+  id := params["id"]
+  var resume Resume
+
+  json.NewDecoder(r.Body).Decode(&resume)
+
+  docId, _ := primitive.ObjectIDFromHex(id)
+
+  collection := db.Client.Database(DATABASE_NAME).Collection(COLLECTION_NAME)
+
+  update := bson.M{
+    "$set": bson.M{
+      "name": resume.Name,
+      "description": resume.Description,
+      "sections": resume.Sections,
+    },
+  }
+
+  collection.UpdateOne(context.TODO(), bson.M{"_id": docId}, update)
+  json, _ := json.Marshal(map[string]string{"status": "ok"})
 
   w.Header().Set("Content-Type", "application/json")
   w.Write(json)
