@@ -10,7 +10,7 @@
     });
     const json = await response.json();
 
-    resumes = json;
+    resumes = json.resumes || [];
   });
 </script>
 

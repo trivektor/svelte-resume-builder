@@ -2,14 +2,15 @@ package resumes
 
 import (
   "log"
+  "strconv"
   "context"
   "net/http"
   "encoding/json"
   "go.mongodb.org/mongo-driver/bson"
-  "go.mongodb.org/mongo-driver/mongo/options"
   "github.com/trivektor/svelte-resume-builder/db"
   "go.mongodb.org/mongo-driver/bson/primitive"
   "github.com/gorilla/mux"
+  . "github.com/gobeam/mongo-go-pagination"
 )
 
 const DATABASE_NAME = "svelte_resumes_builder"
@@ -28,32 +29,41 @@ type Resume struct {
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
-  collection := db.Client.Database(DATABASE_NAME).Collection(COLLECTION_NAME)
-  findOptions := options.Find()
-  findOptions.SetLimit(100)
+  page := 1
 
-  cur, err := collection.Find(context.TODO(), bson.D{}, findOptions)
+  if pageQuery := r.URL.Query().Get("page"); pageQuery != "" {
+    page, _ = strconv.Atoi(pageQuery)
+  }
+
+  var resumes []Resume
+  collection := db.Client.Database(DATABASE_NAME).Collection(COLLECTION_NAME)
+  paginatedData, err := New(collection).Limit(100).Page(int64(page)).Filter(bson.M{}).Find()
 
   if err != nil {
     log.Fatal(err)
   }
 
-  var resumes []*Resume
+  for _, raw := range paginatedData.Data {
+    var resume *Resume
 
-  for cur.Next(context.TODO()) {
-    var resume Resume
-
-    cur.Decode(&resume)
-
-    resumes = append(resumes, &resume)
+    if marshalErr := bson.Unmarshal(raw, &resume); marshalErr == nil {
+      resumes = append(resumes, *resume)
+    }
   }
 
-  cur.Close(context.TODO())
+  response := make(map[string]interface{})
+  response["resumes"] = resumes
+  response["total_count"] = paginatedData.Pagination.Total
+  response["page"] = paginatedData.Pagination.Page
 
-  resumesJson, _ := json.Marshal(resumes)
+  responseJson, jsonErr := json.Marshal(response)
+
+  if jsonErr != nil {
+    log.Fatal(jsonErr)
+  }
 
   w.Header().Set("Content-Type", "application/json")
-  w.Write(resumesJson)
+  w.Write(responseJson)
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
