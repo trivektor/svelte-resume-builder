@@ -53,8 +53,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
   response := make(map[string]interface{})
   response["resumes"] = resumes
-  response["total_count"] = paginatedData.Pagination.Total
-  response["page"] = paginatedData.Pagination.Page
+  response["pagination"] = paginatedData.Pagination
 
   responseJson, jsonErr := json.Marshal(response)
 
