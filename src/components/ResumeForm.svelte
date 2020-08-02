@@ -1,4 +1,6 @@
 <script>
+  import {navigate} from 'svelte-routing';
+
   import Section from './Section.svelte';
   import {resumeStore} from '../stores';
 
@@ -29,6 +31,18 @@
       sections: updatedSections,
     }));
   }
+
+  async function deleteResume() {
+    try {
+      await window.fetch(`http://localhost:8080/resumes/${resume.id}`, {
+        method: 'DELETE',
+      });
+
+      navigate("/", {replace: true});
+    } catch (err) {
+      console.error(err);
+    }
+  }
 </script>
 
 <h2 class="mb-2">Overview</h2>
@@ -51,4 +65,7 @@
     <button type="button" class="bg-blue-500 px-2 py-2 text-white" on:click={addSection}>Add Section</button>
   {/if}
   <button type="submit" class="bg-green-500 px-2 py-2 text-white">Save Resume</button>
+  {#if resume.id}
+  <button type="button" class="bg-red-500 px-2 py-2 text-white" on:click={deleteResume}>Delete Resume</button>
+  {/if}
 </div>

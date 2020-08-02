@@ -6,6 +6,7 @@ import (
   "net/http"
   "encoding/json"
   "go.mongodb.org/mongo-driver/bson"
+  "go.mongodb.org/mongo-driver/mongo/options"
   "github.com/trivektor/svelte-resume-builder/db"
   "go.mongodb.org/mongo-driver/bson/primitive"
   "github.com/gorilla/mux"
@@ -27,7 +28,32 @@ type Resume struct {
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
-  w.Write([]byte("Resumes"))
+  collection := db.Client.Database(DATABASE_NAME).Collection(COLLECTION_NAME)
+  findOptions := options.Find()
+  findOptions.SetLimit(100)
+
+  cur, err := collection.Find(context.TODO(), bson.D{}, findOptions)
+
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  var resumes []*Resume
+
+  for cur.Next(context.TODO()) {
+    var resume Resume
+
+    cur.Decode(&resume)
+
+    resumes = append(resumes, &resume)
+  }
+
+  cur.Close(context.TODO())
+
+  resumesJson, _ := json.Marshal(resumes)
+
+  w.Header().Set("Content-Type", "application/json")
+  w.Write(resumesJson)
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
@@ -87,6 +113,23 @@ func Update(w http.ResponseWriter, r *http.Request) {
   }
 
   collection.UpdateOne(context.TODO(), bson.M{"_id": docId}, update)
+  json, _ := json.Marshal(map[string]string{"status": "ok"})
+
+  w.Header().Set("Content-Type", "application/json")
+  w.Write(json)
+}
+
+func Delete(w http.ResponseWriter, r *http.Request) {
+  params := mux.Vars(r)
+  id := params["id"]
+  docId, _ := primitive.ObjectIDFromHex(id)
+  collection := db.Client.Database(DATABASE_NAME).Collection(COLLECTION_NAME)
+  _, err := collection.DeleteOne(context.TODO(), bson.M{"_id": docId})
+
+  if err != nil {
+    log.Fatal(err)
+  }
+
   json, _ := json.Marshal(map[string]string{"status": "ok"})
 
   w.Header().Set("Content-Type", "application/json")

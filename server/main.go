@@ -24,12 +24,13 @@ func main() {
   r.HandleFunc("/resumes", resumes.Create).Methods("POST")
   r.HandleFunc("/resumes", resumes.Index)
   r.HandleFunc("/resumes/{id}", resumes.Update).Methods("PUT")
+  r.HandleFunc("/resumes/{id}", resumes.Delete).Methods("DELETE")
   r.HandleFunc("/resumes/{id}", resumes.Show)
 
   // https://stackoverflow.com/questions/40985920/making-golang-gorilla-cors-handler-work
   headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Access-Control-Allow-Origin"})
   originsOk := handlers.AllowedOrigins([]string{"*"})
-  methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+  methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS", "DELETE"})
 
   http.ListenAndServe(":8080", handlers.CORS(originsOk, headersOk, methodsOk)(r))
 }
