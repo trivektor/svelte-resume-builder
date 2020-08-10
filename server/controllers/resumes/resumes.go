@@ -30,14 +30,19 @@ type Resume struct {
 
 func Index(w http.ResponseWriter, r *http.Request) {
   page := 1
+  pageSize := 100
 
   if pageQuery := r.URL.Query().Get("page"); pageQuery != "" {
     page, _ = strconv.Atoi(pageQuery)
   }
 
+  if pageSizeQuery := r.URL.Query().Get("pageSize"); pageSizeQuery != "" {
+    pageSize, _ = strconv.Atoi(pageSizeQuery)
+  }
+
   var resumes []Resume
   collection := db.Client.Database(DATABASE_NAME).Collection(COLLECTION_NAME)
-  paginatedData, err := New(collection).Limit(100).Page(int64(page)).Filter(bson.M{}).Find()
+  paginatedData, err := New(collection).Limit(int64(pageSize)).Page(int64(page)).Filter(bson.M{}).Find()
 
   if err != nil {
     log.Fatal(err)

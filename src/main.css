@@ -8,3 +8,12 @@ body {
   padding: 0;
   background: #f7fafc;
 }
+
+.pagination-nav svg {
+  display: inline-block;
+}
+
+.pagination-nav .option.active {
+  color: #4299e1;
+  font-weight: bold;
+}

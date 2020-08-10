@@ -1,17 +1,32 @@
 <script>
   import {Link} from 'svelte-routing';
+  import {paginate, LightPaginationNav} from 'svelte-paginate'
   import {onMount} from 'svelte';
 
   let resumes = [];
+  let page = 1;
+  let pageSize = 5;
+  let totalItems = 0;
 
-  onMount(async () => {
-    const response = await window.fetch('http://localhost:8080/resumes', {
-      header: {'Accept': 'application/json'}
+  async function fetchResumes(params) {
+    const response = await window.fetch('http://localhost:8080/resumes?' + new URLSearchParams(params), {
+      header: {'Accept': 'application/json'},
     });
     const json = await response.json();
 
     resumes = json.resumes || [];
+    totalItems = json.pagination.total;
+  }
+
+  onMount(async () => {
+    await fetchResumes({page, pageSize});
   });
+
+  async function setPage(event) {
+    page = event.detail.page;
+
+    await fetchResumes({page, pageSize});
+  }
 </script>
 
 <Link to="/resumes/new">
@@ -42,3 +57,14 @@
     {/each}
   </tbody>
 </table>
+
+<div class="mt-4">
+  <LightPaginationNav
+    totalItems={totalItems}
+    pageSize={pageSize}
+    currentPage={page}
+    limit="{1}"
+    showStepOptions="{true}"
+    on:setPage={setPage}
+  />
+</div>
