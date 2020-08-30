@@ -1,6 +1,6 @@
 const Resume = `
   type Resume {
-    id: ID!
+    _id: ID!
     name: String!
     description: String
   }

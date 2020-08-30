@@ -1,4 +1,4 @@
-<script>
+<!-- <script>
   import {Link} from 'svelte-routing';
   import {paginate, LightPaginationNav} from 'svelte-paginate'
   import {onMount} from 'svelte';
@@ -27,6 +27,37 @@
 
     await fetchResumes({page, pageSize});
   }
+</script> -->
+
+<script>
+  import {Link} from 'svelte-routing';
+  import {paginate, LightPaginationNav} from 'svelte-paginate';
+  import {getClient, query} from 'svelte-apollo';
+  import {gql} from 'apollo-boost';
+  import {map} from 'lodash-es';
+
+  const RESUMES_QUERY = gql`
+    query ResumesQuery {
+      resumes {
+        totalCount
+        pageInfo {
+          endCursor
+        }
+        edges {
+          node {
+            _id
+            name
+            description
+          }
+        }
+      }
+    }
+  `;
+
+  const client = getClient();
+  const resumes = query(client, {
+    query: RESUMES_QUERY,
+  });
 </script>
 
 <Link to="/resumes/new">
@@ -35,36 +66,42 @@
   </button>
 </Link>
 
-<table class="table-auto">
-  <thead>
-    <tr>
-      <th class="px-4 py-2"></th>
-      <th class="px-4 py-2">Name</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    {#each resumes as resume, index}
+{#await $resumes}
+...Fetching
+{:then result}
+  <table class="table-auto">
+    <thead>
       <tr>
-        <td class="border px-4 py-2">{index + 1}</td>
-        <td class="border px-4 py-2">{resume.name}</td>
-        <td class="border px-4 py-2">
-          <Link to={`/resumes/${resume.id}`}>
-            <button class="bg-blue-500 px-2 py-2 text-white">View Resume</button>
-          </Link>
-        </td>
+        <th class="px-4 py-2">ID</th>
+        <th class="px-4 py-2">Name</th>
+        <th></th>
       </tr>
-    {/each}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {#each map(result.data.resumes.edges, "node") as resume}
+        <tr>
+          <td class="border px-4 py-2">{resume._id}</td>
+          <td class="border px-4 py-2">{resume.name}</td>
+          <td class="border px-4 py-2">
+            <Link to={`/resumes/${resume._id}`}>
+              <button class="bg-blue-500 px-2 py-2 text-white">View Resume</button>
+            </Link>
+          </td>
+        </tr>
+      {/each}
+    </tbody>
+  </table>
 
-<div class="mt-4">
-  <LightPaginationNav
-    totalItems={totalItems}
-    pageSize={pageSize}
-    currentPage={page}
-    limit="{1}"
-    showStepOptions="{true}"
-    on:setPage={setPage}
-  />
-</div>
+  <!--
+  <div class="mt-4">
+    <LightPaginationNav
+      totalItems={totalItems}
+      pageSize={pageSize}
+      currentPage={page}
+      limit="{1}"
+      showStepOptions="{true}"
+      on:setPage={setPage}
+    />
+  </div>
+  -->
+{/await}
