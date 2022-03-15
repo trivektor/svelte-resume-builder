@@ -29,7 +29,7 @@
     "apollo-server": "^2.17.0",
     "apollo-server-express": "^2.17.0",
     "cors": "^2.8.5",
-    "lodash-es": "^4.17.15",
+    "lodash-es": "^4.17.21",
     "mongodb": "^3.6.0",
     "page": "^1.11.6",
     "sirv-cli": "^0.4.4",
